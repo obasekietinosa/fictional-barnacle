@@ -33,6 +33,6 @@ exports.countTweets = functions.https.onRequest((request, response) => {
         tweets = data.statuses;
         let tweetIds = tweets.map(tweet => tweet.id_str);
         db.push(tweetIds);
-        return response.send(data)
+        return response.send({success: true})
     });
 });
