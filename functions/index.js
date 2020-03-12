@@ -33,18 +33,18 @@ exports.countTweets = functions.https.onRequest((request, response) => {
         }
         let tweets = data.statuses;
         let mostRecentTweet = 0;
-        metaDb.child("mostRecentTweet").once("value", data => mostRecentTweet = parseInt(data));
-        console.log(mostRecentTweet);
+        metaDb.child("mostRecentTweet").once("value", data => mostRecentTweet = parseInt(data.val()));
         if (! tweets.length) {
             return console.log("All Tweets Searched");
         }
         if (parseInt(mostRecentTweet) < parseInt(tweets[0].id_str) ) {
-            console.log("Check Performed");
             metaDb.child("mostRecentTweet").set(tweets[0].id_str);
         }
         let tweetIds = {};
         tweets.forEach(tweet => tweetIds[tweet.id_str] = tweet.text);
-        tweetDb.update(tweetIds);
+        tweetDb.update(tweetIds, () => {
+            tweetDb.once( "value", data => metaDb.child("tweetCount").set( data.numChildren() ) );
+         });
 
         return getJSON(env.api_base_url + env.api_search_url + data.search_metadata.next_results, token, checkForTweetsAndUpdate);
     }
