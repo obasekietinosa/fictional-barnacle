@@ -23,7 +23,9 @@ const getJSON = (url, token, callback) => {
     xhr.send();
 }
 
-var url = env.api_base_url + env.api_search_url + env.api_search_query;
+var mostRecentTweet = 0;
+metaDb.child("mostRecentTweet").once("value", data => mostRecentTweet = data.val() ? parseInt(data.val()) : 0 );
+var url = env.api_base_url + env.api_search_url + env.api_search_query + `&since_id=`;
 var token = env.api_token;
 
 exports.countTweets = functions.https.onRequest((request, response) => {
@@ -32,8 +34,6 @@ exports.countTweets = functions.https.onRequest((request, response) => {
             return console.error(error);
         }
         let tweets = data.statuses;
-        let mostRecentTweet = 0;
-        metaDb.child("mostRecentTweet").once("value", data => mostRecentTweet = parseInt(data.val()));
         if (! tweets.length) {
             return console.log("All Tweets Searched");
         }
